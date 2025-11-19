@@ -1,82 +1,185 @@
-# Edr
+# EDR (Nx + NestJS)
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Backend workspace built with Nx and NestJS. Use the commands below to bootstrap your local environment, run the dev servers, and manage TypeORM migrations.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## Prerequisites
+- Node.js 18+ and npm
+- PostgreSQL available for the configured database connection
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-
-## Finish your remote caching setup
-
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/uBLU5iOOv5)
-
-
-## Run tasks
-
-To run the dev server for your app, use:
-
+## Setup
+1) Copy the sample environment file and adjust values as needed:
 ```sh
-npx nx serve server
+cp example.env .env
+```
+2) Install dependencies:
+```sh
+npm install
 ```
 
-To create a production bundle:
-
+## Run the project
+Start both agent and server in watch mode:
 ```sh
-npx nx build server
+npm run start:dev
 ```
 
-To see all available targets to run for a project, run:
+## Database migrations (`libs/database/project.json`)
+Targets for migrations live under `libs/database/project.json` and use the compiled data source at `dist/libs/database/src/lib/ormconfig.js`.
 
+- Generate a new migration:
 ```sh
-npx nx show project server
+npx nx run database:migration:generate --name=AddUsersTable
+```
+  Migration files are written to `libs/database/src/lib/migrations`.
+- Apply migrations:
+```sh
+npx nx run database:migration:run
+```
+- Revert the last migration:
+```sh
+npx nx run database:migration:revert
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## Commit Message Guidelines
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+This project adheres to the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages. This approach helps maintain a clear and consistent history of changes, making it easier to understand the evolution of the codebase and automate versioning and changelog generation.
 
-## Add new projects
+### Commit Types
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+Each commit message should start with a **type** followed by a **scope** (optional) and a **description**. The structure is as follows:
+```code 
+<type>([optional scope]): <description>
 
-Use the plugin's generator to create new projects.
+[optional body]
 
-To generate a new application, use:
-
-```sh
-npx nx g @nx/nest:app demo
+[optional footer]
 ```
 
-To generate a new library, use:
 
-```sh
-npx nx g @nx/node:lib mylib
+### Types of Commits
+
+1. **feat**: A new feature
+   - Use this type when introducing a new functionality to the project.
+   - **Example**: 
+    ```
+     feat(auth): add JWT authentication
+    ```
+   - **Example**: 
+    ```
+    feat(api): add new endpoint for user profile
+
+    This endpoint allows users to fetch their profile information, including name, email, and preferences. It handles user authentication via JWT.
+
+    Closes #42
+    ```
+
+2. **fix**: A bug fix
+   - Use this type when correcting an issue in the code.
+   - **Example**:
+    ```
+    fix(upload): validate file types and sizes
+    ```
+
+3. **docs**: Documentation only changes
+   - Use this type for changes to documentation.
+   - **Example**:
+    ```
+    docs(README): update API usage instructions
+    ```
+
+4. **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.)
+   - Use this type for code style changes.
+   - **Example**:
+    ```
+    style: fix indentation in the main controller
+    ```
+
+5. **refactor**: A code change that neither fixes a bug nor adds a feature
+   - Use this type for code changes that improve the structure or performance but do not alter functionality.
+   - **Example**:
+    ```
+    refactor(api): restructure routes for better clarity
+    ```
+
+6. **perf**: A code change that improves performance
+   - Use this type when optimizing the application.
+   - **Example**:
+    ```
+    perf(database): optimize query for faster response
+    ```
+
+7. **test**: Adding missing or correcting existing tests
+   - Use this type when writing tests or updating existing ones.
+   - **Example**:
+    ```
+    test(auth): add tests for JWT middleware
+    ```
+
+8. **build**: Changes that affect the build system or external dependencies
+   - Use this type for changes related to the build process or dependencies.
+   - **Example**:
+    ```
+    build(deps): update express to version 4.17
+    ```
+
+9. **ci**: Changes to our CI configuration files and scripts
+   - Use this type for changes that affect continuous integration and deployment configurations.
+   - **Example**:
+    ```
+    ci(travis): add environment variables for production
+    ```
+
+10. **chore**: Other changes that don't modify src or test files
+    - Use this type for changes that are not related to features or fixes, like maintenance tasks.
+    - **Example**:
+    ```
+    chore: update package-lock.json
+    ```
+
+11. **revert**: Reverts a previous commit
+    - Use this type to revert a previous commit.
+    - **Example**:
+    ```
+    revert: revert "feat(auth): add JWT authentication"
+    ```
+    - **Example**:
+    ```
+    fix(auth): correct login validation logic
+
+    The previous logic was improperly validating user credentials, leading to failed logins.
+
+    BREAKING CHANGE: The login endpoint now requires a JWT token in the header.
+    ```
+    - **Example**:
+    ```
+    feat(notifications): add email notification feature
+
+    This feature sends an email notification to users when they receive a new message. The email includes the sender's information and a preview of the message.
+    
+    This implementation uses the nodemailer library for sending emails and includes error handling to catch any issues during the sending process.
+    
+    BREAKING CHANGE: The notification service configuration format has changed, requiring an SMTP server configuration.
+    ```
+
+### Breaking Changes
+
+If a commit introduces breaking changes, it must include a `BREAKING CHANGE:` section in the footer. This section should provide information on how the changes may affect users and what steps they may need to take. The format is as follows:
+
+```code
+<type>(<scope>): <description>
+
+BREAKING CHANGE: <description of change>
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+- **Example**:
+```markdown
+feat(auth): add JWT authentication
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+BREAKING CHANGE: The login endpoint now requires a JWT token in the header.
+```
 
+## Why Use Conventional Commits?
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **Clarity**: Provides a clear and concise history of changes.
+- **Automation**: Facilitates automated versioning and changelog generation.
+- **Collaboration**: Improves collaboration by establishing a common language for commit messages.
+- **Organization**: Helps to categorize commits, making it easier to understand the purpose of changes.
