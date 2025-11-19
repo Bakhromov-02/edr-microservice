@@ -1,0 +1,49 @@
+{
+  "name": "database",
+  "sourceRoot": "libs/database/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/dist/libs/database"],
+      "options": {
+        "main": "libs/database/src/index.ts",
+        "tsConfig": "libs/database/tsconfig.lib.json",
+        "outputPath": "dist/libs/database"
+      }
+    },
+    "build-migration-config": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsc libs/database/src/lib/ormconfig.ts --outDir dist/libs/database/src/lib --esModuleInterop --module commonjs --target es2020",
+        "cwd": "."
+      }
+    },
+
+    "migration:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx typeorm --dataSource dist/libs/database/src/lib/ormconfig.js migration:generate libs/database/src/lib/migrations/{args.name}",
+        "cwd": "."
+      },
+      "dependsOn": ["build-migration-config"]
+    },
+
+    "migration:run": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx typeorm --dataSource dist/libs/database/src/lib/ormconfig.js migration:run",
+        "cwd": "."
+      },
+      "dependsOn": ["build-migration-config"]
+    },
+    "migration:revert": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx typeorm --dataSource dist/libs/database/src/lib/ormconfig.js migration:revert",
+        "cwd": "."
+      },
+      "dependsOn": ["build-migration-config"]
+    }
+  }
+}
